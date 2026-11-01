@@ -88,7 +88,7 @@ export default function WorkspaceLayout({ children, active = 'dashboard', dark, 
   return (
     <div className="dashboard-shell">
       <aside className={`dashboard-sidebar${mobileNavOpen ? ' mobile-nav-open' : ''}`}>
-        <div className="dashboard-brand"><Brand /><p className="dashboard-tagline">Translate everything.</p></div>
+        <div className="dashboard-brand"><Brand /></div>
         <div className="mobile-sidebar-actions">
           <button className="mobile-theme-toggle" type="button" onClick={() => setDark(!dark)} aria-label={`Switch to ${dark ? 'light' : 'dark'} mode`} title={`Switch to ${dark ? 'light' : 'dark'} mode`}>
             {dark ? <Sun size={19} aria-hidden="true" /> : <Moon size={19} aria-hidden="true" />}

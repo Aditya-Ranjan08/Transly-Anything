@@ -1450,18 +1450,13 @@ button {
   background: var(--dash-panel);
 }
 .dashboard-brand {
-  padding: 0 9px 25px;
+  padding: 0 9px 30px;
 }
 .dashboard-brand .brand {
   font-size: 21px;
 }
-.dashboard-brand p {
-  margin: 5px 0 0 40px;
-  color: var(--dash-muted);
-  font-size: 9px;
-}
 .side-label {
-  margin: 0 11px 10px;
+  margin: 0 11px 12px;
   color: var(--dash-muted);
   font-size: 8px;
   font-weight: 760;
@@ -1469,7 +1464,7 @@ button {
 }
 .side-nav {
   display: grid;
-  gap: 4px;
+  gap: 5px;
 }
 .side-link {
   display: flex;
@@ -2417,7 +2412,6 @@ button {
     width: 27px;
     height: 27px;
   }
-  .dashboard-brand p,
   .side-label,
   .sidebar-note,
   .sidebar-bottom {
