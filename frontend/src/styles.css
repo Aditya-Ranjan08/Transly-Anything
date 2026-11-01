@@ -3017,6 +3017,21 @@ button {
   background: var(--bg);
   font-size: 11px;
 }
+.auth-session-retry {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--panel);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.auth-session-retry:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
 .auth-spinner,
 .button-spinner {
   width: 18px;
