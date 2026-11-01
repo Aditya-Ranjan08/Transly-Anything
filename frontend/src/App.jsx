@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronDown, FileImage,
   FileText, Globe2, Languages, LayoutDashboard, LogOut, Menu, Moon, ScanText,
@@ -239,6 +239,12 @@ function LandingPage({ dark, setDark, user, onLogout }) {
 export default function App() {
   const [dark, setDark] = useState(() => localStorage.getItem('transly-theme') === 'dark');
   const { user, logout, syncUser } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+    await logout();
+    navigate('/', { replace: true });
+  }
 
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
@@ -248,19 +254,19 @@ export default function App() {
   return (
     <Suspense fallback={<main className="auth-loading"><span className="auth-spinner" /><p>Preparing your workspace…</p></main>}>
       <Routes>
-        <Route path="/" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={logout} />} />
+        <Route path="/" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" dark={dark} setDark={setDark} />} />
         <Route path="/register" element={<AuthPage key="register" mode="register" dark={dark} setDark={setDark} />} />
-        <Route path="/dashboard" element={<RequireAuth><DashboardPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/translate/document" element={<RequireAuth><DocumentTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/translate/image" element={<RequireAuth><ImageTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/translate/text" element={<RequireAuth><TextTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/translation/:id" element={<RequireAuth><TranslationProcessingPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/translation/:id/result" element={<RequireAuth><TranslationResultPage dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/history" element={<RequireAuth><TranslationLibraryPage mode="history" dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/favorites" element={<RequireAuth><TranslationLibraryPage mode="favorites" dark={dark} setDark={setDark} user={user} onLogout={logout} /></RequireAuth>} />
-        <Route path="/settings" element={<RequireAuth><SettingsPage dark={dark} setDark={setDark} user={user} syncUser={syncUser} onLogout={logout} /></RequireAuth>} />
-        <Route path="*" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={logout} />} />
+        <Route path="/dashboard" element={<RequireAuth><DashboardPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/translate/document" element={<RequireAuth><DocumentTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/translate/image" element={<RequireAuth><ImageTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/translate/text" element={<RequireAuth><TextTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/translation/:id" element={<RequireAuth><TranslationProcessingPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/translation/:id/result" element={<RequireAuth><TranslationResultPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/history" element={<RequireAuth><TranslationLibraryPage mode="history" dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/favorites" element={<RequireAuth><TranslationLibraryPage mode="favorites" dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><SettingsPage dark={dark} setDark={setDark} user={user} syncUser={syncUser} onLogout={handleLogout} /></RequireAuth>} />
+        <Route path="*" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} />} />
       </Routes>
     </Suspense>
   );

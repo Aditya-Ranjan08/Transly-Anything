@@ -31,8 +31,12 @@ export default function AuthPage({ mode, dark, setDark }) {
 
     setSubmitting(true);
     try {
-      if (isRegister) await register({ name: name.trim(), email: email.trim(), password });
-      else await login({ email: email.trim(), password });
+      if (isRegister) {
+        await register({ name: name.trim(), email: email.trim(), password });
+        navigate('/login', { replace: true });
+        return;
+      }
+      await login({ email: email.trim(), password });
       const target = location.state?.from?.pathname;
       navigate(target && target !== '/login' && target !== '/register' ? target : '/dashboard', { replace: true });
     } catch (requestError) {

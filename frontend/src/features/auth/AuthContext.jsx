@@ -51,8 +51,6 @@ export function AuthProvider({ children }) {
     },
     async register(details) {
       const { data } = await api.post('/auth/register', details);
-      setUser(data.user);
-      setSessionError('');
       return data.user;
     },
     async logout() {

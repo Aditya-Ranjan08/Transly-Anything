@@ -49,7 +49,6 @@ export async function register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({ name, email, password: hashedPassword });
-    setSessionCookie(req, res, user.id);
     return res.status(201).json({ user: safeUser(user) });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
