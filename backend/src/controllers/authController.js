@@ -15,7 +15,7 @@ function safeUser(user) {
   };
 }
 
-function setSessionCookie(res, userId) {
+function setSessionCookie(req, res, userId) {
   if (!isJwtSecretReady()) {
     const error = new Error('Authentication is not configured. Set JWT_SECRET to a random value with at least 32 characters.');
     error.status = 503;
@@ -26,7 +26,7 @@ function setSessionCookie(res, userId) {
     issuer: 'transly-api',
     expiresIn: '7d',
   });
-  res.cookie('transly_token', token, { ...authCookieOptions(), maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('transly_token', token, { ...authCookieOptions(req), maxAge: 7 * 24 * 60 * 60 * 1000 });
 }
 
 function isJwtSecretReady() {
@@ -49,7 +49,7 @@ export async function register(req, res) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({ name, email, password: hashedPassword });
-    setSessionCookie(res, user.id);
+    setSessionCookie(req, res, user.id);
     return res.status(201).json({ user: safeUser(user) });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
@@ -69,7 +69,7 @@ export async function login(req, res) {
     const user = await User.findOne({ email }).select('+password');
     const passwordMatches = user ? await bcrypt.compare(password, user.password) : false;
     if (!passwordMatches) return res.status(401).json({ message: 'Email or password is incorrect.' });
-    setSessionCookie(res, user.id);
+    setSessionCookie(req, res, user.id);
     return res.json({ user: safeUser(user) });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ message: error.message });
@@ -119,8 +119,8 @@ export async function updatePreferences(req, res) {
   }
 }
 
-export function logout(_req, res) {
-  const cookieOptions = authCookieOptions();
+export function logout(req, res) {
+  const cookieOptions = authCookieOptions(req);
   res.clearCookie('transly_token', cookieOptions);
   // Remove cookies issued before the session cookie covered all API routes.
   res.clearCookie('transly_token', { ...cookieOptions, path: '/api/auth' });
@@ -129,6 +129,6 @@ export function logout(_req, res) {
 
 export function currentUser(req, res) {
   // Refresh the verified session cookie at /api so protected translation routes receive it too.
-  res.cookie('transly_token', req.cookies.transly_token, { ...authCookieOptions(), maxAge: 7 * 24 * 60 * 60 * 1000 });
+  res.cookie('transly_token', req.cookies.transly_token, { ...authCookieOptions(req), maxAge: 7 * 24 * 60 * 60 * 1000 });
   return res.json({ user: safeUser(req.user) });
 }

@@ -1,20 +1,26 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-function isLocalDevelopment() {
+function isLocalOrigin(origin) {
+  return /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\/?$/i.test(origin || '');
+}
+
+function isLocalDevelopment(req) {
+  if (req?.headers?.origin) return isLocalOrigin(req.headers.origin);
+
   const origins = (process.env.CLIENT_URL || '')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
   return process.env.NODE_ENV === 'development'
     && origins.length > 0
-    && origins.every((origin) => /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\/?$/i.test(origin));
+    && origins.every(isLocalOrigin);
 }
 
-export const authCookieOptions = () => ({
+export const authCookieOptions = (req) => ({
   httpOnly: true,
-  secure: !isLocalDevelopment(),
-  sameSite: isLocalDevelopment() ? 'lax' : 'none',
+  secure: !isLocalDevelopment(req),
+  sameSite: isLocalDevelopment(req) ? 'lax' : 'none',
   path: '/api',
 });
 
@@ -32,7 +38,7 @@ export async function requireAuth(req, res, next) {
     req.user = user;
     next();
   } catch {
-    res.clearCookie('transly_token', authCookieOptions());
+    res.clearCookie('transly_token', authCookieOptions(req));
     return res.status(401).json({ message: 'Your session has expired. Please log in again.' });
   }
 }
