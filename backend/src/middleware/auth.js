@@ -1,10 +1,20 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
+function isLocalDevelopment() {
+  const origins = (process.env.CLIENT_URL || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+  return process.env.NODE_ENV === 'development'
+    && origins.length > 0
+    && origins.every((origin) => /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\/?$/i.test(origin));
+}
+
 export const authCookieOptions = () => ({
   httpOnly: true,
-  secure: process.env.NODE_ENV !== 'development',
-  sameSite: process.env.NODE_ENV === 'development' ? 'lax' : 'none',
+  secure: !isLocalDevelopment(),
+  sameSite: isLocalDevelopment() ? 'lax' : 'none',
   path: '/api',
 });
 
