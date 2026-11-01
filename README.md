@@ -26,6 +26,10 @@ PDF, image, and plain-text translations all create the same tracked job and resu
 
 The client runs on `http://localhost:5173`; the API runs on `http://localhost:5000`. Registration and login create an HttpOnly session cookie. The dashboard requires a valid session. Translation and document-processing behavior will be added in later milestones.
 
+## Deploy the frontend to Vercel
+
+Set the Vercel project's Root Directory to `frontend`. The included `frontend/vercel.json` routes browser requests for React pages (such as `/login` and `/dashboard`) back to the Vite app, so opening or refreshing those URLs does not return Vercel's 404 page. Set `VITE_API_URL` in the Vercel project to the deployed backend URL followed by `/api` (for example, `https://your-backend.onrender.com/api`) and redeploy.
+
 ## Workspace layout
 
 - `frontend/`: React, Vite, Tailwind CSS and browser application

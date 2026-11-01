@@ -131,7 +131,7 @@ export default function DocumentTranslatorPage({ dark, setDark, user, onLogout }
   return (
     <WorkspaceLayout active="document" dark={dark} setDark={setDark} user={user} onLogout={onLogout} searchPlaceholder="Search translations">
       <main className="document-content">
-        <div className="document-breadcrumb"><a href="/dashboard">Dashboard</a><ArrowRight size={13} /><span>Document translator</span></div>
+        <div className="document-breadcrumb"><Link to="/dashboard">Dashboard</Link><ArrowRight size={13} /><span>Document translator</span></div>
         <motion.section className="document-intro" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35 }}>
           <div className="document-title-group"><span className="document-title-icon"><FileText size={24} /></span><div><span className="welcome-kicker"><Sparkles size={13} /> PDF WORKSPACE</span><h1>Document translator</h1><p>Choose a PDF and prepare it for a clear, readable translation.</p></div></div>
           <div className="document-hero-art" aria-hidden="true"><div className="document-art-halo" /><div className="document-art-paper"><span className="document-art-pdf">PDF</span><i /><i /><i /><b><Languages size={15} /> A <ArrowRight size={12} /> अ</b></div><span className="document-art-orbit orbit-pdf"><FileText size={16} /></span><span className="document-art-orbit orbit-lang"><Languages size={17} /></span><span className="document-art-star">✦</span></div>

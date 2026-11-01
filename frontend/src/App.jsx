@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Route, Routes } from 'react-router-dom';
+import { Link, Route, Routes } from 'react-router-dom';
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronDown, FileImage,
   FileText, Globe2, Languages, LayoutDashboard, LogOut, Menu, Moon, ScanText,
@@ -20,6 +20,7 @@ const TranslationResultPage = lazy(() => import('./pages/TranslationResultPage.j
 const TranslationLibraryPage = lazy(() => import('./pages/TranslationLibraryPage.jsx'));
 const SettingsPage = lazy(() => import('./pages/SettingsPage.jsx'));
 const AuthPage = lazy(() => import('./features/auth/AuthPage.jsx'));
+const MotionLink = motion.create(Link);
 
 const features = [
   { icon: FileText, title: 'PDF translation', text: 'Translate selectable text in a clean, readable document.' },
@@ -107,11 +108,11 @@ function LandingPage({ dark, setDark, user, onLogout }) {
             {navItems.map(([label, href]) => <a className={activeNav === href.slice(1) ? 'is-active' : ''} aria-current={activeNav === href.slice(1) ? 'location' : undefined} key={label} href={href} onClick={closeMenu}>{label}</a>)}
             {user ? <>
               <div className="mobile-account-summary"><span className="landing-account-avatar">{initials}</span><span><b>{user.name || 'Transly account'}</b><small>{user.email}</small></span></div>
-              <a className="mobile-nav-login" href="/dashboard" onClick={closeMenu}><LayoutDashboard size={16} /> Go to dashboard</a>
+              <Link className="mobile-nav-login" to="/dashboard" onClick={closeMenu}><LayoutDashboard size={16} /> Go to dashboard</Link>
               <button className="mobile-nav-cta mobile-nav-logout" type="button" onClick={() => void handleLogout()}><LogOut size={16} /> Log out</button>
             </> : <>
-              <a className="mobile-nav-login" href="/login" onClick={closeMenu}>Log in</a>
-              <a className="mobile-nav-cta" href="/register" onClick={closeMenu}>Get started <ArrowUpRight size={16} /></a>
+              <Link className="mobile-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
+              <Link className="mobile-nav-cta" to="/register" onClick={closeMenu}>Get started <ArrowUpRight size={16} /></Link>
             </>}
           </nav>
           <div className="nav-actions">
@@ -124,12 +125,12 @@ function LandingPage({ dark, setDark, user, onLogout }) {
               </button>
               {accountOpen && <div className="landing-account-dropdown" role="menu">
                 <div className="landing-account-details"><b>{user.name || 'Transly account'}</b><span>{user.email}</span></div>
-                <a href="/dashboard" role="menuitem" onClick={() => setAccountOpen(false)}><LayoutDashboard size={17} /> Go to dashboard</a>
+                <Link to="/dashboard" role="menuitem" onClick={() => setAccountOpen(false)}><LayoutDashboard size={17} /> Go to dashboard</Link>
                 <button type="button" role="menuitem" onClick={() => void handleLogout()}><LogOut size={17} /> Log out</button>
               </div>}
             </div> : <>
-              <a className="login-link" href="/login">Log in</a>
-              <a className="button button-small button-primary" href="/register">Get started <ArrowUpRight size={15} /></a>
+              <Link className="login-link" to="/login">Log in</Link>
+              <Link className="button button-small button-primary" to="/register">Get started <ArrowUpRight size={15} /></Link>
             </>}
           </div>
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
@@ -146,7 +147,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
             <p className="hero-description">Understand your documents in another language. Transly is being built to make translation feel clear, careful and easy.</p>
             <div className="hero-actions">
               {user
-                ? <a className="button button-primary hero-dashboard-button" href="/dashboard">Go to dashboard <ArrowRight size={16} /></a>
+                ? <Link className="button button-primary hero-dashboard-button" to="/dashboard">Go to dashboard <ArrowRight size={16} /></Link>
                 : <a className="button button-quiet" href="#how-it-works">See how it works <ArrowDownRight size={16} /></a>}
             </div>
             <div className="trust-note"><span className="trust-icon"><Check size={13} /></span> Designed for readable results, not just word swaps</div>
@@ -180,10 +181,10 @@ function LandingPage({ dark, setDark, user, onLogout }) {
           </div>
           <div className="tool-grid">
             {tools.map(({ icon: Icon, number, title, detail, href, tone }) => (
-              <motion.a className={`tool-card tone-${tone}`} href={href} key={title} whileHover={{ y: -4 }} transition={{ duration: 0.18 }}>
+              <MotionLink className={`tool-card tone-${tone}`} to={href} key={title} whileHover={{ y: -4 }} transition={{ duration: 0.18 }}>
                 <div className="tool-card-top"><span className="tool-icon"><Icon size={21} strokeWidth={1.8} /></span><span className="tool-number">{number}</span></div>
                 <div className="tool-card-bottom"><div><h3>{title}</h3><p>{detail}</p></div><span className="round-arrow"><ArrowUpRight size={17} /></span></div>
-              </motion.a>
+              </MotionLink>
             ))}
           </div>
         </section>
@@ -216,7 +217,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
         <section className="closing-cta section-wrap" id="account">
           <div className="cta-orb"><Sparkles size={23} /></div>
           <div><span className="section-kicker">A new perspective is close</span><h2>Make every word go further.</h2><p>Create your workspace and keep your translation journey in one place.</p></div>
-          <a className="button button-light" href="/register">Create your account <ArrowRight size={16} /></a>
+          <Link className="button button-light" to="/register">Create your account <ArrowRight size={16} /></Link>
         </section>
       </main>
 
@@ -225,7 +226,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
           <div className="footer-brand"><Brand /><p>Translate anything.<br />Understand everything.</p><span className="footer-note">A clearer way to understand every document.</span></div>
           <div className="footer-links">
             <div><b>Explore</b><a href="#features">Features & languages</a><a href="#how-it-works">How it works</a><a href="#quick-translator">Translate a file</a></div>
-            <div><b>Your workspace</b>{user ? <><a href="/dashboard">Go to dashboard</a><button type="button" onClick={() => void handleLogout()}>Log out</button></> : <><a href="/register">Create an account</a><a href="/login">Log in</a></>}<a href="#home">Back to top</a></div>
+            <div><b>Your workspace</b>{user ? <><Link to="/dashboard">Go to dashboard</Link><button type="button" onClick={() => void handleLogout()}>Log out</button></> : <><Link to="/register">Create an account</Link><Link to="/login">Log in</Link></>}<a href="#home">Back to top</a></div>
           </div>
           <div className="footer-bottom"><span>© 2026 Transly. All rights reserved. Made by Ranjan.</span><span>Made for a world with more than one language.</span></div>
         </div>
