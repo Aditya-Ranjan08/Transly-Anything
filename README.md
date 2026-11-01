@@ -30,12 +30,12 @@ The client runs on `http://localhost:5173`; the API runs on `http://localhost:50
 
 Set the Vercel project's Root Directory to `frontend`. The included `frontend/vercel.json` routes browser requests for React pages (such as `/login` and `/dashboard`) back to the Vite app, so opening or refreshing those URLs does not return Vercel's 404 page.
 
-Set these deployment environment variables, then redeploy both services:
+Set these deployment environment variables:
 
 - **Vercel**: `VITE_API_URL=https://transly-anything.onrender.com/api` (the frontend also appends `/api` if only the backend host is configured).
-- **Render**: `CLIENT_URL=https://transly-anything-adi.vercel.app`. For multiple frontend origins, provide a comma-separated list. Keep the exact scheme and hostname; do not include a path.
+- **Render**: The backend allows `https://transly-anything-adi.vercel.app` and local development by default. Set `CLIENT_URL` to add any other frontend origins as a comma-separated list. Keep the exact scheme and hostname; do not include a path.
 
-The backend uses credentialed CORS and secure cross-site session cookies in production. Keep `withCredentials` enabled in the frontend and do not use a wildcard CORS origin.
+After backend code or environment changes, redeploy the Render service. The backend uses credentialed CORS and secure cross-site session cookies in production. Keep `withCredentials` enabled in the frontend and do not use a wildcard CORS origin.
 
 ## Workspace layout
 
