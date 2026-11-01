@@ -155,7 +155,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
 
           <motion.div className="hero-art" aria-label="Illustration of a document being translated" initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.65, delay: 0.12, ease: 'easeOut' }}>
             <div className="art-orbit orbit-one" /><div className="art-orbit orbit-two" />
-            <div className="floating-chip chip-left"><Languages size={17} /><span>Hola <ArrowRight size={12} /> नमस्ते</span></div>
+            <div className="floating-chip chip-left"><Languages size={17} /><span>Hello <ArrowRight size={12} /> नमस्ते</span></div>
             <div className="floating-chip chip-right"><span className="live-dot" /> Meaning, carried over</div>
             <div className="translation-preview preview-left" aria-hidden="true"><div className="preview-card-top"><i /><b /></div><div className="preview-green-block"><i /><i /><i /></div><div className="preview-card-lines"><i /><i /><i /></div></div>
             <div className="translation-preview preview-right" aria-hidden="true"><div className="preview-card-top"><i /><b /></div><div className="preview-translate-row"><span /><i /><i /></div><div className="preview-card-lines"><i /><i /><i /><i /></div></div>
