@@ -3844,7 +3844,8 @@
   }
   .dashboard-shell .dashboard-footer > span:last-child {
     margin: 0;
-    font-size: 13px;
+    font-size: clamp(9px, 3.1vw, 11px);
+    white-space: nowrap;
   }
 }
 @media (max-width: 520px) {
@@ -4589,5 +4590,4 @@ html {
     font-size: 11px;
   }
 }
-
 
