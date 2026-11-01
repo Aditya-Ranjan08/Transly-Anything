@@ -17,10 +17,7 @@
     "react-router-dom": "^7.9.5"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.16",
     "@vitejs/plugin-react": "^5.0.4",
-    "daisyui": "^5.7.50",
-    "tailwindcss": "^4.1.16",
     "vite": "^7.1.12"
   }
 }

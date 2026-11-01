@@ -15,6 +15,7 @@ export default function AuthPage({ mode, dark, setDark }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -69,12 +70,12 @@ export default function AuthPage({ mode, dark, setDark }) {
           <p className="auth-card-description">{isRegister ? 'Start with a free account. Your workspace is ready when you are.' : 'Pick up where you left off and continue your translation journey.'}</p>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {isRegister && <label className="auth-field"><span>Your name</span><input className="input input-bordered w-full" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Aanya Sharma" maxLength={60} required /></label>}
-            <label className="auth-field"><span>Email address</span><input className="input input-bordered w-full" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" maxLength={254} required /></label>
-            <label className="auth-field"><span>Password</span><span className="password-input"><input type={showPassword ? 'text' : 'password'} autoComplete={isRegister ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.target.value)} placeholder={isRegister ? 'At least 8 characters' : 'Enter your password'} maxLength={72} required /><button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label>
-            {isRegister && <label className="auth-field"><span>Confirm password</span><input className="input input-bordered w-full" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="Enter your password again" maxLength={72} required /></label>}
+            {isRegister && <div className="auth-field"><label htmlFor="auth-name">Your name</label><input className="auth-control" id="auth-name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.currentTarget.value)} placeholder="e.g. Aanya Sharma" maxLength={60} required /></div>}
+            <div className="auth-field"><label htmlFor="auth-email">Email address</label><input className="auth-control" id="auth-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.currentTarget.value)} placeholder="you@example.com" maxLength={254} required /></div>
+            <div className="auth-field"><label htmlFor="auth-password">Password</label><div className="password-input"><input className="auth-password-control" id="auth-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete={isRegister ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.currentTarget.value)} placeholder={isRegister ? 'At least 8 characters' : 'Enter your password'} maxLength={72} required /><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>
+            {isRegister && <div className="auth-field"><label htmlFor="auth-confirm-password">Confirm password</label><div className="password-input"><input className="auth-password-control" id="auth-confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.currentTarget.value)} placeholder="Enter your password again" maxLength={72} required /><button type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'} aria-pressed={showConfirmPassword}>{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>}
             {error && <div className="auth-error" role="alert">{error}</div>}
-            <button className="btn btn-primary auth-submit w-full" type="submit" disabled={submitting || authLoading}>{submitting ? <><span className="button-spinner" /> {isRegister ? 'Creating accountâ€¦' : 'Logging inâ€¦'}</> : <>{isRegister ? 'Create account' : 'Log in'} <ArrowRight size={16} /></>}</button>
+            <button className="auth-submit" type="submit" disabled={submitting || authLoading} aria-busy={submitting}>{submitting ? <><span className="button-spinner" /> {isRegister ? 'Creating account…' : 'Logging in…'}</> : <>{isRegister ? 'Create account' : 'Log in'} <ArrowRight size={17} /></>}</button>
           </form>
 
           <p className="auth-switch">{isRegister ? 'Already have an account?' : 'New to Transly?'} <Link to={isRegister ? '/login' : '/register'} state={location.state}>{isRegister ? 'Log in' : 'Create an account'}</Link></p>
@@ -85,4 +86,3 @@ export default function AuthPage({ mode, dark, setDark }) {
     </main>
   );
 }
-
