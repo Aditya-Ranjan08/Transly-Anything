@@ -83,10 +83,14 @@ export default function ImageTranslatorPage({ dark, setDark, user, onLogout }) {
     form.append('sourceLanguage', sourceLanguage);
     form.append('targetLanguage', targetLanguage);
     try {
-      const { data } = await api.post('/translations/images', form);
+      const { data } = await api.post('/translations/images', form, { timeout: 120000 });
       navigate(`/translation/${data.job.id}`);
     } catch (requestError) {
-      setError(requestError.response?.data?.message || 'Could not start image translation. Check the backend and try again.');
+      const message = requestError.response?.data?.message
+        || (requestError.code === 'ECONNABORTED'
+          ? 'The upload timed out. Check your connection and try again.'
+          : 'Could not start image translation. Check the backend and try again.');
+      setError(message);
     } finally {
       setSubmitting(false);
     }
