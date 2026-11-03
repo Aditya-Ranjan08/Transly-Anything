@@ -28,14 +28,14 @@ The client runs on `http://localhost:5173`; the API runs on `http://localhost:50
 
 ## Deploy the frontend to Vercel
 
-The Render service hosts the API only; its root URL is not a frontend page. Check `https://transly-anything.onrender.com/api/health` to verify the API. Deploy the frontend separately to Vercel and set the Vercel project's Root Directory to `frontend`. The included `frontend/vercel.json` routes browser requests for React pages (such as `/login` and `/dashboard`) back to the Vite app, so opening or refreshing those URLs does not return Vercel's 404 page.
+The Render service hosts the API only; its root URL is not a frontend page. Check `https://transly-anything.onrender.com/api/health` to verify the API. Deploy the frontend separately to Vercel and set the Vercel project's Root Directory to `frontend`. The included `frontend/vercel.json` proxies `/api/*` requests to Render and routes browser requests for React pages (such as `/login` and `/dashboard`) back to the Vite app. The same-origin API proxy keeps session cookies first-party in browsers that restrict cross-site cookies.
 
 Set these deployment environment variables:
 
-- **Vercel**: `VITE_API_URL=https://transly-anything.onrender.com/api`. Production builds use this Render API URL if the variable is blank or a relative path.
+- **Vercel**: No API URL variable is needed; production builds use the same-origin `/api` proxy configured in `frontend/vercel.json`.
 - **Render**: Set `NODE_ENV=production`, `CLIENT_URL=https://transly-anything-adi.vercel.app`, `MONGODB_URI`, and a private random `JWT_SECRET` with at least 32 characters. Set the translation provider's credentials as needed. The backend allows the listed Vercel origin and local development by default; `CLIENT_URL` adds frontend origins. Keep the exact scheme and hostname; do not include a path.
 
-After backend code or environment changes, redeploy the Render service. The backend uses credentialed CORS and secure cross-site session cookies unless explicitly configured for local development (`NODE_ENV=development` and a localhost-only `CLIENT_URL`). Keep `withCredentials` enabled in the frontend and do not use a wildcard CORS origin.
+After backend code or environment changes, redeploy the Render service. The backend uses credentialed CORS and secure session cookies. Keep `withCredentials` enabled in the frontend and do not use a wildcard CORS origin.
 
 ## Workspace layout
 
