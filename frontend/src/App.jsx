@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, Route, Routes, useNavigate } from 'react-router-dom';
 import {
   ArrowDownRight, ArrowRight, ArrowUpRight, Check, ChevronDown, FileImage,
-  FileText, Globe2, Languages, LayoutDashboard, LogOut, Menu, Moon, ScanText,
+  FileText, Globe2, Languages, LayoutDashboard, LogIn, LogOut, Menu, Moon, ScanText,
   ShieldCheck, Sparkles, Sun, X,
 } from 'lucide-react';
 import Brand from './components/Brand.jsx';
@@ -111,7 +111,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
               <Link className="mobile-nav-login" to="/dashboard" onClick={closeMenu}><LayoutDashboard size={16} /> Go to dashboard</Link>
               <button className="mobile-nav-cta mobile-nav-logout" type="button" onClick={() => void handleLogout()}><LogOut size={16} /> Log out</button>
             </> : <>
-              <Link className="mobile-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
+              <Link className="mobile-nav-login" to="/login" onClick={closeMenu}><LogIn size={16} /> Log in</Link>
             </>}
           </nav>
           <div className="nav-actions">
@@ -128,7 +128,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
                 <button type="button" role="menuitem" onClick={() => void handleLogout()}><LogOut size={17} /> Log out</button>
               </div>}
             </div> : <>
-              <Link className="login-link" to="/login">Log in</Link>
+              <Link className="login-link" to="/login"><LogIn size={16} /> Log in</Link>
             </>}
           </div>
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
@@ -146,7 +146,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
             <div className="hero-actions">
               {user
                 ? <Link className="button button-primary hero-dashboard-button" to="/dashboard">Go to dashboard <ArrowRight size={16} /></Link>
-                : <Link className="button button-quiet" to="/register">Get started <ArrowDownRight size={16} /></Link>}
+                : <Link className="button button-primary" to="/register">Get started <ArrowUpRight size={16} /></Link>}
             </div>
             <div className="trust-note"><span className="trust-icon"><Check size={13} /></span> Designed for readable results, not just word swaps</div>
           </motion.div>

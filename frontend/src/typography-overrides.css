@@ -1681,7 +1681,7 @@
 .auth-back-link {
   min-height: 42px;
   padding: 0 12px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
   border-radius: 10px;
   background: var(--surface);
   text-decoration: none;
@@ -2582,7 +2582,7 @@
   min-height: 54px;
   border-color: var(--line);
   border-radius: 12px;
-  color: var(--ink);
+  color: var(--accent);
   background: var(--surface);
   font: inherit;
   font-size: 16px;
@@ -2624,7 +2624,7 @@
   padding: 0 16px;
   border: 0;
   outline: 0;
-  color: var(--ink);
+  color: var(--accent);
   background: transparent;
   font: inherit;
   font-size: 16px;
@@ -4590,4 +4590,31 @@ html {
     padding-inline: 7px;
     font-size: 11px;
   }
+}
+.site-shell .nav-actions .login-link {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid #35a653;
+  border-radius: 12px;
+  background: #35a653;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 5px 14px rgb(53 166 83 / 22%);
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+}
+.site-shell .nav-actions .login-link:hover {
+  border-color: #278b45;
+  background: #278b45;
+  color: #fff;
+  box-shadow: 0 7px 18px rgb(53 166 83 / 30%);
+  transform: translateY(-1px);
+}
+.site-shell .nav-actions .login-link svg {
+  color: currentColor;
 }
