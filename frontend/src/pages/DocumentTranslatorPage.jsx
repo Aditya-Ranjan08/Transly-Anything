@@ -112,11 +112,16 @@ export default function DocumentTranslatorPage({ dark, setDark, user, onLogout }
     try {
       const { data } = await api.post('/translations/jobs', form, {
         timeout: 120000,
-        headers: { 'Content-Type': 'multipart/form-data' },
       });
       navigate(`/translation/${data.job.id}`);
     } catch (requestError) {
-      setUploadError(requestError.response?.data?.message || 'Could not upload this document. Check the backend and try again.');
+      const message = requestError.response?.data?.message
+        || (requestError.code === 'ECONNABORTED'
+          ? 'The upload timed out. Check your connection and try again.'
+          : !requestError.response
+            ? 'Could not reach the backend. Check your internet connection and try again.'
+            : 'Could not upload this document. Check the backend and try again.');
+      setUploadError(message);
     } finally {
       setSubmitting(false);
     }

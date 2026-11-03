@@ -83,7 +83,7 @@ export default function ImageTranslatorPage({ dark, setDark, user, onLogout }) {
     form.append('sourceLanguage', sourceLanguage);
     form.append('targetLanguage', targetLanguage);
     try {
-      const { data } = await api.post('/translations/images', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const { data } = await api.post('/translations/images', form);
       navigate(`/translation/${data.job.id}`);
     } catch (requestError) {
       setError(requestError.response?.data?.message || 'Could not start image translation. Check the backend and try again.');
@@ -131,4 +131,3 @@ export default function ImageTranslatorPage({ dark, setDark, user, onLogout }) {
     </WorkspaceLayout>
   );
 }
-
