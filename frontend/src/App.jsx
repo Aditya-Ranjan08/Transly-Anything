@@ -112,7 +112,6 @@ function LandingPage({ dark, setDark, user, onLogout }) {
               <button className="mobile-nav-cta mobile-nav-logout" type="button" onClick={() => void handleLogout()}><LogOut size={16} /> Log out</button>
             </> : <>
               <Link className="mobile-nav-login" to="/login" onClick={closeMenu}>Log in</Link>
-              <Link className="mobile-nav-cta" to="/register" onClick={closeMenu}>Get started <ArrowUpRight size={16} /></Link>
             </>}
           </nav>
           <div className="nav-actions">
@@ -130,7 +129,6 @@ function LandingPage({ dark, setDark, user, onLogout }) {
               </div>}
             </div> : <>
               <Link className="login-link" to="/login">Log in</Link>
-              <Link className="button button-small button-primary" to="/register">Get started <ArrowUpRight size={15} /></Link>
             </>}
           </div>
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
@@ -148,7 +146,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
             <div className="hero-actions">
               {user
                 ? <Link className="button button-primary hero-dashboard-button" to="/dashboard">Go to dashboard <ArrowRight size={16} /></Link>
-                : <a className="button button-quiet" href="#how-it-works">See how it works <ArrowDownRight size={16} /></a>}
+                : <Link className="button button-quiet" to="/register">Get started <ArrowDownRight size={16} /></Link>}
             </div>
             <div className="trust-note"><span className="trust-icon"><Check size={13} /></span> Designed for readable results, not just word swaps</div>
           </motion.div>
