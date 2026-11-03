@@ -6434,6 +6434,15 @@ button {
   gap: 10px;
   margin-top: 14px;
 }
+.result-translated-text {
+  grid-template-columns: minmax(0, 1fr);
+}
+.result-translated-text pre {
+  min-height: 120px;
+  max-height: 60vh;
+  font-size: 14px;
+  line-height: 1.8;
+}
 .result-text-panels article {
   min-width: 0;
   padding: 12px;
