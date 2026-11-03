@@ -6259,6 +6259,7 @@ button {
   color: var(--dash-muted);
   background: var(--dash-panel);
   cursor: pointer;
+  text-decoration: none;
 }
 .preview-download:hover {
   color: var(--purple);
@@ -6280,10 +6281,11 @@ button {
   border: 0;
   background: var(--dash-panel);
 }
-.result-pdf-frame object a {
+.result-pdf-open-link {
   display: inline-flex;
-  margin: 16px;
+  margin-top: 8px;
   color: var(--purple);
+  text-decoration: none;
 }
 .result-preview-empty {
   display: flex;
@@ -6332,6 +6334,7 @@ button {
   font-size: 8px;
   font-weight: 650;
   cursor: pointer;
+  text-decoration: none;
 }
 .result-primary-button {
   border-color: transparent;

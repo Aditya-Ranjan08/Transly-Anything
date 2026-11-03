@@ -12,6 +12,13 @@ const languageNames = { en: 'English', hi: 'Hindi', es: 'Spanish', fr: 'French',
 const translatedPdfFilename = (name) => `Transly-${String(name || 'translation').replace(/\.[^.]+$/, '') || 'translation'}.pdf`;
 const translatedTextFilename = (name) => `Transly-${String(name || 'translation').replace(/\.[^.]+$/, '') || 'translation'}.txt`;
 
+function resultFileUrl(id, kind, inline = false) {
+  return api.getUri({
+    url: `/translations/jobs/${encodeURIComponent(id)}/${kind}`,
+    ...(inline ? { params: { inline: 1 } } : {}),
+  });
+}
+
 export default function TranslationResultPage({ dark, setDark, user, onLogout }) {
   const { id } = useParams();
   const [job, setJob] = useState(null);
@@ -27,7 +34,6 @@ export default function TranslationResultPage({ dark, setDark, user, onLogout })
 
   useEffect(() => {
     let active = true;
-    let objectUrls = [];
 
     async function loadResult() {
       setLoading(true);
@@ -43,23 +49,13 @@ export default function TranslationResultPage({ dark, setDark, user, onLogout })
         const requests = await Promise.allSettled([
           data.job.hasOriginalText ? api.get(`/translations/jobs/${id}/text/original`, { responseType: 'text' }) : Promise.resolve({ data: '' }),
           data.job.hasTranslatedText ? api.get(`/translations/jobs/${id}/text/translated`, { responseType: 'text' }) : Promise.resolve({ data: '' }),
-          data.job.hasOriginal ? api.get(`/translations/jobs/${id}/preview/${data.job.fileType === 'image' ? 'original-image' : 'original-pdf'}?inline=1`, { responseType: 'blob' }) : Promise.resolve(null),
-          data.job.hasTranslatedPdf ? api.get(`/translations/jobs/${id}/preview/translated-pdf?inline=1`, { responseType: 'blob' }) : Promise.resolve(null),
         ]);
         if (!active) return;
-        const [originalTextResult, translatedTextResult, originalPdfResult, translatedPdfResult] = requests;
+        const [originalTextResult, translatedTextResult] = requests;
         if (originalTextResult.status === 'fulfilled') setOriginalText(String(originalTextResult.value.data || ''));
         if (translatedTextResult.status === 'fulfilled') setTranslatedText(String(translatedTextResult.value.data || ''));
-        if (originalPdfResult.status === 'fulfilled' && originalPdfResult.value?.data) {
-          const url = URL.createObjectURL(originalPdfResult.value.data);
-          objectUrls.push(url);
-          setOriginalPreview(url);
-        }
-        if (translatedPdfResult.status === 'fulfilled' && translatedPdfResult.value?.data) {
-          const url = URL.createObjectURL(translatedPdfResult.value.data);
-          objectUrls.push(url);
-          setTranslatedPreview(url);
-        }
+        if (data.job.hasOriginal) setOriginalPreview(resultFileUrl(id, `preview/${data.job.fileType === 'image' ? 'original-image' : 'original-pdf'}`, true));
+        if (data.job.hasTranslatedPdf) setTranslatedPreview(resultFileUrl(id, 'preview/translated-pdf', true));
         if (data.job.status === 'completed' && !data.job.hasTranslatedPdf && !data.job.hasTranslatedText) {
           setError('Translation completed, but its result files are no longer available. Submit the document again.');
         }
@@ -73,7 +69,6 @@ export default function TranslationResultPage({ dark, setDark, user, onLogout })
     void loadResult();
     return () => {
       active = false;
-      objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [id]);
 
@@ -127,8 +122,8 @@ export default function TranslationResultPage({ dark, setDark, user, onLogout })
           {notice && <div className="result-notice" role="status">{notice}</div>}
           {!hasPdf && hasTextResult && <div className="result-notice result-font-note"><CircleAlert size={15} /> Translated text is saved. The translated PDF is missing for this failed job; submit the PDF again after restarting the backend.</div>}
           {job.status === 'completed' && hasPdf && job.fileType !== 'text' ? <div className="result-preview-grid">
-            <section className="result-preview-card"><div className="result-preview-heading original-heading"><span><FileText size={16} /></span><div><h2>{job.fileType === 'image' ? 'Original image' : 'Original document'}</h2><small>{sourceName}</small></div></div><div className={job.fileType === 'image' ? 'result-image-frame' : 'result-pdf-frame'}>{originalPreview ? (job.fileType === 'image' ? <img src={originalPreview} alt={`Original ${job.originalFileName}`} /> : <object aria-label="Original PDF preview" data={originalPreview} type="application/pdf"><a href={originalPreview} target="_blank" rel="noreferrer">Open original PDF</a></object>) : <div className="result-preview-empty"><FileText size={24} /><p>Original preview expired.</p></div>}</div></section>
-            <section className="result-preview-card"><div className="result-preview-heading translated-heading"><span><Languages size={16} /></span><div><h2>Translated document</h2><small>{targetName}</small></div><button type="button" className="preview-download" onClick={() => void download('translated-pdf', translatedPdfFilename(job.originalFileName))} title="Download translated PDF"><Download size={15} /></button></div><div className="result-pdf-frame">{translatedPreview ? <object aria-label="Translated PDF preview" data={translatedPreview} type="application/pdf"><a href={translatedPreview} target="_blank" rel="noreferrer">Open translated PDF</a></object> : <div className="result-preview-empty"><FileText size={24} /><p>Translated preview expired.</p></div>}</div></section>
+            <section className="result-preview-card"><div className="result-preview-heading original-heading"><span><FileText size={16} /></span><div><h2>{job.fileType === 'image' ? 'Original image' : 'Original document'}</h2><small>{sourceName}</small></div></div><div className={job.fileType === 'image' ? 'result-image-frame' : 'result-pdf-frame'}>{originalPreview ? (job.fileType === 'image' ? <img src={originalPreview} alt={`Original ${job.originalFileName}`} /> : <iframe title="Original PDF preview" src={originalPreview} />) : <div className="result-preview-empty"><FileText size={24} /><p>Original preview expired.</p></div>}</div>{job.fileType !== 'image' && originalPreview && <a className="result-pdf-open-link" href={originalPreview} target="_blank" rel="noreferrer">Open original PDF</a>}</section>
+            <section className="result-preview-card"><div className="result-preview-heading translated-heading"><span><Languages size={16} /></span><div><h2>Translated document</h2><small>{targetName}</small></div><a className="preview-download" href={resultFileUrl(id, 'download/translated-pdf')} download={translatedPdfFilename(job.originalFileName)} title="Download translated PDF" aria-label="Download translated PDF"><Download size={15} /></a></div><div className="result-pdf-frame">{translatedPreview ? <iframe title="Translated PDF preview" src={translatedPreview} /> : <div className="result-preview-empty"><FileText size={24} /><p>Translated preview expired.</p></div>}</div>{translatedPreview && <a className="result-pdf-open-link" href={translatedPreview} target="_blank" rel="noreferrer">Open translated PDF</a>}</section>
           </div> : <section className="result-text-panels">
             <article><h2>Original text</h2><pre>{originalText || 'Original text preview is unavailable.'}</pre></article>
             <article><h2>Translated text</h2><pre>{translatedText || 'No translated text was saved for this job.'}</pre></article>
@@ -137,7 +132,7 @@ export default function TranslationResultPage({ dark, setDark, user, onLogout })
           {hasTextResult && <details className="result-text-details"><summary>Open text previews <ChevronRight size={15} /></summary><div className="result-text-panels"><article><h2>Original text</h2><pre>{originalText || 'Original text preview is unavailable.'}</pre></article><article><h2>Translated text</h2><pre>{translatedText}</pre></article></div></details>}
 
           <section className="result-actions"><div className="result-download-actions">
-            {hasPdf && <button className="result-primary-button" onClick={() => void download('translated-pdf', translatedPdfFilename(job.originalFileName))}><Download size={15} /> Download translated PDF</button>}
+            {hasPdf && <a className="result-primary-button" href={resultFileUrl(id, 'download/translated-pdf')} download={translatedPdfFilename(job.originalFileName)}><Download size={15} /> Download translated PDF</a>}
             {hasTextResult && <><button className="result-secondary-button" onClick={() => void copyText()}><Copy size={15} /> Copy translated text</button><button className="result-secondary-button" onClick={() => void download('translated-text', translatedTextFilename(job.originalFileName))}><Download size={15} /> Download text</button></>}
             <Link className="result-secondary-button" to={translatorPath}><RefreshCw size={14} /> {job.status === 'failed' ? 'Retry translation' : 'Translate another'}</Link>
           </div><span className="result-expiry">Temporary files expire {job.expiresAt ? new Date(job.expiresAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : 'after 24 hours'}.</span></section>
