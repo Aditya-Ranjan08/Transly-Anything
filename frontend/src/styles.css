@@ -6268,18 +6268,30 @@ button {
 .result-pdf-frame {
   height: min(61vh, 650px);
   min-height: 360px;
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid var(--dash-line);
   border-radius: 8px;
   background: var(--dash-soft);
 }
-.result-pdf-frame iframe,
-.result-pdf-frame object {
+.pdf-document-viewer {
+  min-height: 100%;
+  padding: 8px;
+}
+.pdf-document-viewer canvas {
   display: block;
   width: 100%;
-  height: 100%;
-  border: 0;
+  height: auto;
+  margin: 0 auto 10px;
   background: var(--dash-panel);
+  box-shadow: 0 1px 5px rgb(22 28 25 / 18%);
+}
+.pdf-preview-status {
+  margin: 12px;
+  color: var(--dash-muted);
+  text-align: center;
+}
+.pdf-preview-error {
+  color: var(--dash-danger, #a23e46);
 }
 .result-pdf-open-link {
   display: inline-flex;
