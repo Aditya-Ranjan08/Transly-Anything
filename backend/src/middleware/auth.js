@@ -2,7 +2,21 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 function isLocalOrigin(origin) {
-  return /^http:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?\/?$/i.test(origin || '');
+  try {
+    const { protocol, hostname } = new URL(origin);
+    if (protocol !== 'http:') return false;
+    const host = hostname.toLowerCase();
+    if (host === 'localhost' || host === '::1' || host === '[::1]') return true;
+    const octets = host.split('.');
+    if (octets.length !== 4 || octets.some((part) => !/^\d{1,3}$/.test(part) || Number(part) > 255)) return false;
+    const [first, second] = octets.map(Number);
+    return first === 127
+      || first === 10
+      || (first === 192 && second === 168)
+      || (first === 172 && second >= 16 && second <= 31);
+  } catch {
+    return false;
+  }
 }
 
 function isLocalDevelopment(req) {
