@@ -4,36 +4,60 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, FileText, Globe2, Languages, Moon, ShieldCheck, Sparkles, Sun } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
 import { useAuth } from './AuthContext.jsx';
+import api from '../../lib/api.js';
 
 export default function AuthPage({ mode, dark, setDark }) {
   const isRegister = mode === 'register';
+  const isForgotPassword = mode === 'forgot-password';
+  const isResetPassword = mode === 'reset-password';
   const { user, loading: authLoading, login, register } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(location.state?.email || '');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [verificationPending, setVerificationPending] = useState(false);
+  const [otp, setOtp] = useState('');
 
   if (!authLoading && user) return <Navigate to="/dashboard" replace />;
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError('');
-    if (isRegister && name.trim().length < 2) return setError('Please enter your name (at least 2 characters).');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) return setError('Please enter a valid email address.');
-    if (password.length < 8 || new TextEncoder().encode(password).length > 72) return setError('Use at least 8 characters and no more than 72 UTF-8 bytes for your password.');
-    if (isRegister && password !== confirmPassword) return setError('Those passwords do not match.');
+    const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    if (!emailIsValid) return setError('Please enter a valid email address.');
+    if (verificationPending || isResetPassword) {
+      if (!/^\d{6}$/.test(otp.trim())) return setError('Enter the 6-digit code from your email.');
+    }
+    if (isRegister && !verificationPending && name.trim().length < 2) return setError('Please enter your name (at least 2 characters).');
+    if (!isForgotPassword && !verificationPending && (password.length < 8 || new TextEncoder().encode(password).length > 72)) return setError('Use at least 8 characters and no more than 72 UTF-8 bytes for your password.');
+    if (isRegister && !verificationPending && password !== confirmPassword) return setError('Those passwords do not match.');
 
     setSubmitting(true);
     try {
+      if (verificationPending) {
+        await api.post('/auth/verify-otp', { email: email.trim(), otp: otp.trim() });
+        navigate('/login', { replace: true, state: { email: email.trim() } });
+        return;
+      }
+      if (isForgotPassword) {
+        await api.post('/auth/forgot-password', { email: email.trim() });
+        navigate('/reset-password', { replace: true, state: { email: email.trim() } });
+        return;
+      }
+      if (isResetPassword) {
+        await api.post('/auth/reset-password', { email: email.trim(), otp: otp.trim(), password });
+        navigate('/login', { replace: true, state: { email: email.trim() } });
+        return;
+      }
       if (isRegister) {
         await register({ name: name.trim(), email: email.trim(), password });
-        navigate('/login', { replace: true });
+        setVerificationPending(true);
         return;
       }
       await login({ email: email.trim(), password });
@@ -70,19 +94,22 @@ export default function AuthPage({ mode, dark, setDark }) {
         <motion.div className="auth-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35 }}>
           <div className="auth-card-brand"><Brand /></div>
           <span className="auth-card-kicker">{isRegister ? 'YOUR TRANSLATION SPACE' : 'WELCOME BACK'}</span>
-          <h2>{isRegister ? 'Create your account' : 'Log in to Transly'}</h2>
-          <p className="auth-card-description">{isRegister ? 'Start with a free account. Your workspace is ready when you are.' : 'Pick up where you left off and continue your translation journey.'}</p>
+          <h2>{verificationPending ? 'Verify your email' : isForgotPassword ? 'Forgot password' : isResetPassword ? 'Reset your password' : isRegister ? 'Create your account' : 'Log in to Transly'}</h2>
+          <p className="auth-card-description">{verificationPending ? 'Enter the 6-digit code we sent to your email address.' : isForgotPassword ? 'Enter your email address and we’ll send a reset code.' : isResetPassword ? 'Enter the code from your email and choose a new password.' : isRegister ? 'Start with a free account. Your workspace is ready when you are.' : 'Pick up where you left off and continue your translation journey.'}</p>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {isRegister && <div className="auth-field"><label htmlFor="auth-name">Your name</label><input className="auth-control" id="auth-name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.currentTarget.value)} placeholder="e.g. Aanya Sharma" maxLength={60} required /></div>}
-            <div className="auth-field"><label htmlFor="auth-email">Email address</label><input className="auth-control" id="auth-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.currentTarget.value)} placeholder="you@example.com" maxLength={254} required /></div>
-            <div className="auth-field"><label htmlFor="auth-password">Password</label><div className="password-input"><input className="auth-password-control" id="auth-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete={isRegister ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.currentTarget.value)} placeholder={isRegister ? 'At least 8 characters' : 'Enter your password'} maxLength={72} required /><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>
-            {isRegister && <div className="auth-field"><label htmlFor="auth-confirm-password">Confirm password</label><div className="password-input"><input className="auth-password-control" id="auth-confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.currentTarget.value)} placeholder="Enter your password again" maxLength={72} required /><button type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'} aria-pressed={showConfirmPassword}>{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>}
+            {isRegister && !verificationPending && <div className="auth-field"><label htmlFor="auth-name">Your name</label><input className="auth-control" id="auth-name" name="name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.currentTarget.value)} placeholder="e.g. Aanya Sharma" maxLength={60} required /></div>}
+            <div className="auth-field"><label htmlFor="auth-email">Email address</label><input className="auth-control" id="auth-email" name="email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.currentTarget.value)} placeholder="you@example.com" maxLength={254} readOnly={isResetPassword || verificationPending} required /></div>
+            {(verificationPending || isResetPassword) && <div className="auth-field"><label htmlFor="auth-otp">6-digit code</label><input className="auth-control" id="auth-otp" name="otp" type="text" inputMode="numeric" autoComplete="one-time-code" value={otp} onChange={(event) => setOtp(event.currentTarget.value.replace(/\D/g, '').slice(0, 6))} maxLength={6} required /></div>}
+            {!isForgotPassword && !verificationPending && <div className="auth-field"><label htmlFor="auth-password">{isResetPassword ? 'New password' : 'Password'}</label><div className="password-input"><input className="auth-password-control" id="auth-password" name="password" type={showPassword ? 'text' : 'password'} autoComplete={isRegister || isResetPassword ? 'new-password' : 'current-password'} value={password} onChange={(event) => setPassword(event.currentTarget.value)} placeholder={isRegister || isResetPassword ? 'At least 8 characters' : 'Enter your password'} maxLength={72} required /><button type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>}
+            {isRegister && !verificationPending && <div className="auth-field"><label htmlFor="auth-confirm-password">Confirm password</label><div className="password-input"><input className="auth-password-control" id="auth-confirm-password" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.currentTarget.value)} placeholder="Enter your password again" maxLength={72} required /><button type="button" onClick={() => setShowConfirmPassword((visible) => !visible)} aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'} aria-pressed={showConfirmPassword}>{showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button></div></div>}
             {error && <div className="auth-error" role="alert">{error}</div>}
-            <button className="auth-submit" type="submit" disabled={submitting || authLoading} aria-busy={submitting}>{submitting ? <><span className="button-spinner" /> {isRegister ? 'Creating account…' : 'Logging in…'}</> : <>{isRegister ? 'Create account' : 'Log in'} <ArrowRight size={17} /></>}</button>
+            <button className="auth-submit" type="submit" disabled={submitting || authLoading} aria-busy={submitting}>{submitting ? <><span className="button-spinner" /> Please wait…</> : <>{verificationPending ? 'Verify email' : isForgotPassword ? 'Send reset code' : isResetPassword ? 'Reset password' : isRegister ? 'Create account' : 'Log in'} <ArrowRight size={17} /></>}</button>
           </form>
 
-          <p className="auth-switch">{isRegister ? 'Already have an account?' : 'New to Transly?'} <Link to={isRegister ? '/login' : '/register'} state={location.state}>{isRegister ? 'Log in' : 'Create an account'}</Link></p>
+          {!isForgotPassword && !isResetPassword && !verificationPending && <p className="auth-switch">{isRegister ? 'Already have an account?' : 'New to Transly?'} <Link to={isRegister ? '/login' : '/register'} state={location.state}>{isRegister ? 'Log in' : 'Create an account'}</Link></p>}
+          {mode === 'login' && <p className="auth-switch"><Link to="/forgot-password">Forgot your password?</Link></p>}
+          {(isForgotPassword || isResetPassword) && <p className="auth-switch"><Link to="/login">Back to log in</Link></p>}
           <div className="auth-secure-note"><ShieldCheck size={14} /> Passwords are hashed before they are stored.</div>
         </motion.div>
         <p className="auth-legal">By continuing, you agree to use Transly responsibly. <span>Your account data stays yours.</span></p>

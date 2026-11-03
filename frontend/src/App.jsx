@@ -255,6 +255,8 @@ export default function App() {
         <Route path="/" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" dark={dark} setDark={setDark} />} />
         <Route path="/register" element={<AuthPage key="register" mode="register" dark={dark} setDark={setDark} />} />
+        <Route path="/forgot-password" element={<AuthPage key="forgot-password" mode="forgot-password" dark={dark} setDark={setDark} />} />
+        <Route path="/reset-password" element={<AuthPage key="reset-password" mode="reset-password" dark={dark} setDark={setDark} />} />
         <Route path="/dashboard" element={<RequireAuth><DashboardPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
         <Route path="/translate/document" element={<RequireAuth><DocumentTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
         <Route path="/translate/image" element={<RequireAuth><ImageTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />

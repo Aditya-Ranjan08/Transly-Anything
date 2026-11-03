@@ -33,8 +33,9 @@ export async function requireAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET, { issuer: 'transly-api' });
-    const user = await User.findById(payload.sub).select('name email preferredLanguage createdAt');
+    const user = await User.findById(payload.sub).select('name email preferredLanguage createdAt isVerified');
     if (!user) return res.status(401).json({ message: 'Your session has expired. Please log in again.' });
+    if (!user.isVerified) return res.status(403).json({ message: 'Verify your email address before continuing.' });
     req.user = user;
     next();
   } catch {

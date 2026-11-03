@@ -1,9 +1,23 @@
 import bcrypt from 'bcryptjs';
+import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authCookieOptions } from '../middleware/auth.js';
+import { sendOtpEmail } from '../services/email.js';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+function hashOtp(otp) {
+  return createHash('sha256').update(otp).digest('hex');
+}
+
+function otpMatches(candidate, storedHash) {
+  if (!/^\d{6}$/.test(candidate) || !storedHash) return false;
+  const candidateHash = Buffer.from(hashOtp(candidate), 'hex');
+  const expectedHash = Buffer.from(storedHash, 'hex');
+  return candidateHash.length === expectedHash.length && timingSafeEqual(candidateHash, expectedHash);
+}
 
 function safeUser(user) {
   return {
@@ -34,7 +48,6 @@ function isJwtSecretReady() {
 }
 
 export async function register(req, res) {
-  if (!isJwtSecretReady()) return res.status(503).json({ message: 'Authentication is not configured. Set JWT_SECRET to a private random value of at least 32 characters.' });
   const name = typeof req.body?.name === 'string' ? req.body.name.trim() : '';
   const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
   const password = typeof req.body?.password === 'string' ? req.body.password : '';
@@ -44,16 +57,42 @@ export async function register(req, res) {
   if (password.length < 8 || Buffer.byteLength(password, 'utf8') > 72) return res.status(400).json({ message: 'Password must be at least 8 characters and no longer than 72 UTF-8 bytes.' });
 
   try {
-    const existing = await User.exists({ email });
-    if (existing) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
-
+    const existing = await User.findOne({ email });
+    if (existing?.isVerified) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
     const hashedPassword = await bcrypt.hash(password, 12);
-    const user = await User.create({ name, email, password: hashedPassword });
-    return res.status(201).json({ user: safeUser(user) });
+    const otp = String(randomInt(100000, 1000000));
+    const user = existing || new User({ name, email });
+    user.name = name;
+    user.password = hashedPassword;
+    user.isVerified = false;
+    user.otp = hashOtp(otp);
+    user.otpExpires = new Date(Date.now() + OTP_TTL_MS);
+    await user.save();
+    await sendOtpEmail({ to: email, name, otp, purpose: 'verification' });
+    return res.status(201).json({ message: 'We sent a verification code to your email address.' });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
     if (error.status) return res.status(error.status).json({ message: error.message });
     return res.status(500).json({ message: 'We could not create your account. Please try again.' });
+  }
+}
+
+export async function verifyOtp(req, res) {
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const otp = typeof req.body?.otp === 'string' ? req.body.otp.trim() : '';
+  if (!emailPattern.test(email) || !/^\d{6}$/.test(otp)) return res.status(400).json({ message: 'Enter a valid email address and 6-digit code.' });
+  try {
+    const user = await User.findOne({ email }).select('+otp +otpExpires');
+    if (!user || user.isVerified || !user.otpExpires || user.otpExpires <= new Date() || !otpMatches(otp, user.otp)) {
+      return res.status(400).json({ message: 'That code is invalid or expired. Request a new verification code.' });
+    }
+    user.isVerified = true;
+    user.otp = undefined;
+    user.otpExpires = undefined;
+    await user.save();
+    return res.json({ message: 'Your email has been verified. You can now log in.' });
+  } catch {
+    return res.status(500).json({ message: 'We could not verify your email. Please try again.' });
   }
 }
 
@@ -68,11 +107,52 @@ export async function login(req, res) {
     const user = await User.findOne({ email }).select('+password');
     const passwordMatches = user ? await bcrypt.compare(password, user.password) : false;
     if (!passwordMatches) return res.status(401).json({ message: 'Email or password is incorrect.' });
+    if (!user.isVerified) return res.status(403).json({ message: 'Verify your email address before logging in.' });
     setSessionCookie(req, res, user.id);
     return res.json({ user: safeUser(user) });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ message: error.message });
     return res.status(500).json({ message: 'We could not log you in. Please try again.' });
+  }
+}
+
+export async function forgotPassword(req, res) {
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  if (email.length > 254 || !emailPattern.test(email)) return res.status(400).json({ message: 'Enter a valid email address.' });
+  try {
+    const user = await User.findOne({ email });
+    if (user?.isVerified) {
+      const otp = String(randomInt(100000, 1000000));
+      user.resetPasswordOtp = hashOtp(otp);
+      user.resetPasswordExpires = new Date(Date.now() + OTP_TTL_MS);
+      await user.save();
+      await sendOtpEmail({ to: email, name: user.name, otp, purpose: 'reset' });
+    }
+    return res.json({ message: 'If an account exists for that email, a password reset code has been sent.' });
+  } catch (error) {
+    if (error.status) return res.status(error.status).json({ message: error.message });
+    return res.status(500).json({ message: 'We could not send a reset code. Please try again.' });
+  }
+}
+
+export async function resetPassword(req, res) {
+  const email = typeof req.body?.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const otp = typeof req.body?.otp === 'string' ? req.body.otp.trim() : '';
+  const password = typeof req.body?.password === 'string' ? req.body.password : '';
+  if (!emailPattern.test(email) || !/^\d{6}$/.test(otp)) return res.status(400).json({ message: 'Enter a valid email address and 6-digit code.' });
+  if (password.length < 8 || Buffer.byteLength(password, 'utf8') > 72) return res.status(400).json({ message: 'Password must be at least 8 characters and no longer than 72 UTF-8 bytes.' });
+  try {
+    const user = await User.findOne({ email }).select('+resetPasswordOtp +resetPasswordExpires');
+    if (!user || !user.isVerified || !user.resetPasswordExpires || user.resetPasswordExpires <= new Date() || !otpMatches(otp, user.resetPasswordOtp)) {
+      return res.status(400).json({ message: 'That code is invalid or expired. Request another reset code.' });
+    }
+    user.password = await bcrypt.hash(password, 12);
+    user.resetPasswordOtp = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+    return res.json({ message: 'Your password has been reset. You can now log in.' });
+  } catch {
+    return res.status(500).json({ message: 'We could not reset your password. Please try again.' });
   }
 }
 

@@ -110,7 +110,7 @@ export default function DocumentTranslatorPage({ dark, setDark, user, onLogout }
     form.append('sourceLanguage', sourceLanguage);
     form.append('targetLanguage', targetLanguage);
     try {
-      const { data } = await api.post('/translations/jobs', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const { data } = await api.post('/translations/jobs', form, { timeout: 120000 });
       navigate(`/translation/${data.job.id}`);
     } catch (requestError) {
       setUploadError(requestError.response?.data?.message || 'Could not upload this document. Check the backend and try again.');

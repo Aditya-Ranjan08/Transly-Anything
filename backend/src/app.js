@@ -34,6 +34,9 @@ app.use((error, _req, res, _next) => {
   if (error.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({ message: 'This file is larger than the configured upload limit.' });
   }
+  if (error.name === 'MulterError') {
+    return res.status(400).json({ message: 'The upload could not be read. Please choose the PDF again and retry.' });
+  }
   if (error.message === 'Choose a PDF file to continue.' || error.message === 'Choose a PNG, JPG, or WebP image to continue.') return res.status(400).json({ message: error.message });
   return res.status(error.status || 500).json({ message: error.status ? error.message : 'The request could not be completed.' });
 });
