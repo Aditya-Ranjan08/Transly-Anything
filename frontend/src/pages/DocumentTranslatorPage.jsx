@@ -110,6 +110,7 @@ export default function DocumentTranslatorPage({ dark, setDark, user, onLogout }
     form.append('sourceLanguage', sourceLanguage);
     form.append('targetLanguage', targetLanguage);
     try {
+      await api.get('/health', { timeout: 120000 });
       const { data } = await api.post('/translations/jobs', form, {
         timeout: 120000,
       });
