@@ -149,7 +149,7 @@ export default function DocumentTranslatorPage({ dark, setDark, user, onLogout }
         <div className="document-layout">
           <motion.section className="document-panel" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .38, delay: .06 }}>
             <div className="document-tabs" role="tablist" aria-label="Translation input type">
-              <button className="document-tab active" role="tab" aria-selected="true" aria-label="PDF document"><FileText size={16} /><strong className="tab-label-desktop">PDF document</strong><strong className="tab-label-mobile">PDF</strong></button>
+              <button className="document-tab active" role="tab" aria-selected="true" aria-label="PDF"><FileText size={16} /><strong>PDF</strong></button>
               <Link className="document-tab" role="tab" aria-selected="false" to="/translate/image"><Image size={16} /> Image</Link>
               <Link className="document-tab" role="tab" aria-selected="false" to="/translate/text"><Languages size={16} /> Text</Link>
             </div>

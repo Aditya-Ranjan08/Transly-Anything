@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowRightLeft, Check, ChevronDown, CircleAlert, CloudUpload, FileImage, Languages, LockKeyhole, RefreshCw, Sparkles, X } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, Check, ChevronDown, CircleAlert, CloudUpload, FileImage, FileText, Image as ImageIcon, Languages, LockKeyhole, RefreshCw, Sparkles, X } from 'lucide-react';
 import WorkspaceLayout from '../components/WorkspaceLayout.jsx';
 import useProviderCapabilities from '../features/translation/useProviderCapabilities.js';
 import recommendedTargetLanguage from '../features/translation/recommendedTargetLanguage.js';
@@ -108,7 +108,7 @@ export default function ImageTranslatorPage({ dark, setDark, user, onLogout }) {
       <main className="translation-tool-content">
         <div className="document-breadcrumb"><Link to="/dashboard">Dashboard</Link><ArrowRight size={13} /><span>Image translator</span></div>
         <header className="translation-tool-heading"><span className="translation-tool-icon image-tool-icon"><FileImage size={23} /></span><div><span className="welcome-kicker"><Sparkles size={13} /> IMAGE WORKSPACE</span><h1>Translate an image</h1><p>Extract text from an image, translate it, then review or download the result.</p></div></header>
-        <nav className="translation-mode-tabs" aria-label="Translation type"><Link to="/translate/document">PDF document</Link><Link className="active" to="/translate/image">Image</Link><Link to="/translate/text">Text</Link></nav>
+        <nav className="document-tabs tool-document-tabs" aria-label="Translation type"><Link className="document-tab" to="/translate/document"><FileText size={16} /> PDF</Link><Link className="document-tab active" aria-current="page" to="/translate/image"><ImageIcon size={16} /> Image</Link><Link className="document-tab" to="/translate/text"><Languages size={16} /> Text</Link></nav>
 
         <div className="translation-tool-grid">
           <section className="translation-tool-card">

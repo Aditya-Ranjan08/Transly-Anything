@@ -2215,6 +2215,109 @@
   }
 }
 
+/* Consistent, calm form controls across auth, settings, search and translators. */
+.auth-page .auth-control,
+.dashboard-shell .settings-password-form input,
+.dashboard-shell .settings-language-label select,
+.dashboard-shell .library-toolbar select,
+.dashboard-shell .library-toolbar label,
+.dashboard-shell .dashboard-search,
+.translation-tool-content .translation-textarea {
+  border: 1px solid color-mix(in srgb, var(--muted) 22%, var(--line));
+  border-radius: 13px;
+  background-color: var(--surface);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+.auth-page .auth-control,
+.dashboard-shell .settings-password-form input,
+.dashboard-shell .settings-language-label select,
+.dashboard-shell .library-toolbar select {
+  min-height: 50px;
+  padding: 0 15px;
+  color: var(--ink);
+  font-size: 15px;
+}
+.auth-page .auth-control:hover,
+.dashboard-shell .settings-password-form input:hover,
+.dashboard-shell .settings-language-label select:hover,
+.dashboard-shell .library-toolbar select:hover,
+.dashboard-shell .library-toolbar label:hover,
+.dashboard-shell .dashboard-search:hover,
+.translation-tool-content .translation-textarea:hover {
+  border-color: color-mix(in srgb, var(--purple) 42%, var(--line));
+}
+.auth-page .auth-control:focus,
+.dashboard-shell .settings-password-form input:focus,
+.dashboard-shell .settings-language-label select:focus,
+.dashboard-shell .library-toolbar select:focus,
+.dashboard-shell .library-toolbar label:focus-within,
+.translation-tool-content .translation-textarea:focus {
+  border-color: var(--purple);
+  outline: 0;
+  background-color: var(--surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--purple) 13%, transparent);
+}
+.dashboard-shell .dashboard-search:focus-within {
+  border-color: var(--purple);
+  background-color: var(--surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--purple) 13%, transparent);
+}
+.dashboard-shell .library-toolbar input:focus,
+.dashboard-shell .dashboard-search input:focus {
+  outline: 0;
+}
+.dashboard-shell .library-toolbar select,
+.dashboard-shell .settings-language-label select {
+  appearance: none;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2377727d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+.document-content .language-select-wrap,
+.tool-language-row .language-select-wrap {
+  border: 1px solid color-mix(in srgb, var(--dash-muted) 24%, var(--dash-line));
+  border-radius: 14px;
+  background: var(--dash-panel);
+  box-shadow: 0 2px 5px rgb(25 30 28 / 3%);
+}
+.document-content .language-select-wrap:hover,
+.tool-language-row .language-select-wrap:hover {
+  border-color: color-mix(in srgb, var(--purple) 48%, var(--dash-line));
+}
+.document-content .language-select-wrap:focus-within,
+.tool-language-row .language-select-wrap:focus-within {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--purple) 13%, transparent);
+}
+.auth-page .password-input button {
+  width: 42px;
+  min-height: 40px;
+  flex-basis: 42px;
+  align-self: center;
+  margin-right: 6px;
+  border-radius: 10px;
+}
+.auth-page .password-input button svg {
+  width: 19px;
+  height: 19px;
+  stroke-width: 1.9;
+}
+.auth-page .password-input button:active {
+  transform: scale(0.96);
+}
+.auth-page .password-input button:focus-visible {
+  outline-offset: -2px;
+}
+@media (max-width: 520px) {
+  .auth-page .auth-control,
+  .dashboard-shell .settings-password-form input,
+  .dashboard-shell .settings-language-label select,
+  .dashboard-shell .library-toolbar select {
+    min-height: 48px;
+  }
+}
+
 /* Translation result: readable file summary, side-by-side previews and clear actions. */
 .result-content {
   width: min(1500px, 100%);
@@ -4617,4 +4720,106 @@ html {
 }
 .site-shell .nav-actions .login-link svg {
   color: currentColor;
+}
+
+/* Keep the password visibility control compact after the auth field rules. */
+.auth-page .password-input button {
+  width: 42px;
+  min-height: 40px;
+  flex-basis: 42px;
+  align-self: center;
+  margin-right: 6px;
+  border-radius: 10px;
+}
+.auth-page .password-input button svg { width: 19px; height: 19px; stroke-width: 1.9; }
+.auth-page .password-input button:active { transform: scale(0.96); }
+
+/* Keep browser autofill and the password reveal area on the same surface. */
+.auth-page input.auth-control:-webkit-autofill,
+.auth-page input.auth-control:-webkit-autofill:hover,
+.auth-page input.auth-control:-webkit-autofill:focus,
+.auth-page input.auth-password-control:-webkit-autofill,
+.auth-page input.auth-password-control:-webkit-autofill:hover,
+.auth-page input.auth-password-control:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--purple);
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  transition: background-color 99999s ease-out 0s;
+}
+.auth-page .password-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: none;
+}
+.auth-page .password-input input.auth-password-control,
+.auth-page .password-input input.auth-password-control:-webkit-autofill {
+  border: 0 !important;
+  outline: 0 !important;
+}
+.auth-page .password-input button {
+  border: 0 !important;
+  background: transparent;
+  box-shadow: none !important;
+}
+
+/* Use the PDF translator's tab treatment in the image and text workspaces too. */
+.translation-tool-content .tool-document-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.translation-tool-content .tool-document-tabs .document-tab {
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--dash-line);
+  border-radius: 10px;
+  color: var(--dash-ink);
+  background: var(--dash-soft);
+  font-size: 13px;
+  text-decoration: none;
+  transition: border-color 160ms ease, color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+.translation-tool-content .tool-document-tabs .document-tab svg {
+  flex: 0 0 auto;
+}
+.translation-tool-content .tool-document-tabs .document-tab.active {
+  border-color: #258341;
+  color: #fff;
+  background: linear-gradient(120deg, #258341, #35a653);
+  box-shadow: 0 5px 14px rgb(37 131 65 / 20%);
+}
+.translation-tool-content .tool-document-tabs .document-tab.active svg {
+  color: #fff;
+}
+.translation-tool-content .tool-document-tabs .document-tab:not(.active):hover {
+  border-color: color-mix(in srgb, #35a653 55%, var(--dash-line));
+  color: #258341;
+  background: color-mix(in srgb, #35a653 7%, var(--dash-panel));
+}
+:root[data-theme="dark"] .translation-tool-content .tool-document-tabs .document-tab.active {
+  border-color: #26743b;
+  background: linear-gradient(120deg, #26743b, #318d49);
+}
+@media (max-width: 520px) {
+  .translation-tool-content .tool-document-tabs { gap: 5px; }
+  .translation-tool-content .tool-document-tabs .document-tab {
+    min-height: 44px;
+    gap: 5px;
+    padding-inline: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .translation-tool-content .tool-document-tabs .document-tab svg {
+    width: 15px;
+    height: 15px;
+  }
 }

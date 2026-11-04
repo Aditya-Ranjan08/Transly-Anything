@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowRightLeft, ChevronDown, CircleAlert, Languages, LockKeyhole, RefreshCw, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft, ChevronDown, CircleAlert, FileText, FileImage, Languages, LockKeyhole, RefreshCw, Sparkles } from 'lucide-react';
 import WorkspaceLayout from '../components/WorkspaceLayout.jsx';
 import useProviderCapabilities from '../features/translation/useProviderCapabilities.js';
 import recommendedTargetLanguage from '../features/translation/recommendedTargetLanguage.js';
@@ -74,7 +74,7 @@ export default function TextTranslatorPage({ dark, setDark, user, onLogout }) {
       <main className="translation-tool-content">
         <div className="document-breadcrumb"><Link to="/dashboard">Dashboard</Link><ArrowRight size={13} /><span>Text translator</span></div>
         <header className="translation-tool-heading"><span className="translation-tool-icon text-tool-icon"><Languages size={23} /></span><div><span className="welcome-kicker"><Sparkles size={13} /> TEXT WORKSPACE</span><h1>Translate text</h1><p>Paste a passage and translate it into a language you choose.</p></div></header>
-        <nav className="translation-mode-tabs" aria-label="Translation type"><Link to="/translate/document">PDF document</Link><Link to="/translate/image">Image</Link><Link className="active" to="/translate/text">Text</Link></nav>
+        <nav className="document-tabs tool-document-tabs" aria-label="Translation type"><Link className="document-tab" to="/translate/document"><FileText size={16} /> PDF</Link><Link className="document-tab" to="/translate/image"><FileImage size={16} /> Image</Link><Link className="document-tab active" aria-current="page" to="/translate/text"><Languages size={16} /> Text</Link></nav>
 
         <div className="translation-tool-grid text-tool-grid">
           <section className="translation-tool-card">
