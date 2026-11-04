@@ -4823,3 +4823,50 @@ html {
     height: 15px;
   }
 }
+
+/* Final viewport safeguards for small phones and mobile landing navigation. */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  min-width: 320px;
+  overflow-x: clip;
+}
+.dashboard-shell,
+.dashboard-main,
+.site-shell,
+.auth-page,
+.translation-tool-content,
+.document-content,
+.processing-content,
+.result-content,
+.library-content,
+.settings-content {
+  min-width: 0;
+}
+.dashboard-shell { min-height: 100dvh; }
+img,
+canvas {
+  max-width: 100%;
+}
+.site-shell .nav-actions .mobile-dashboard-link { display: none; }
+@media (max-width: 900px) {
+  .site-shell .main-nav,
+  .site-shell .menu-toggle {
+    display: none !important;
+  }
+  .site-shell .nav-actions .landing-account-menu { display: none; }
+  .site-shell .nav-actions .login-link {
+    display: inline-flex;
+    min-height: 42px;
+    padding-inline: 14px;
+  }
+  .site-shell .nav-actions .mobile-dashboard-link { display: inline-flex; }
+}
+@media (max-width: 380px) {
+  .site-shell .nav-wrap { width: calc(100% - 24px); gap: 8px; }
+  .site-shell .nav-actions { gap: 7px; }
+  .site-shell .nav-actions .login-link { min-height: 40px; padding-inline: 10px; }
+}
