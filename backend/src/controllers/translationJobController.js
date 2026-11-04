@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import TranslationJob from '../models/TranslationJob.js';
 import { getCapabilities, supportsPair } from '../services/translation/libreTranslate.js';
 import { enqueueTranslation } from '../jobs/translationWorker.js';
+import { sendDatabaseUnavailable } from '../utils/databaseErrors.js';
 
 const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
 const storageRoot = path.resolve(moduleDirectory, '../../storage/tmp');
@@ -114,6 +115,7 @@ export async function createTranslationJob(req, res) {
     enqueueTranslation(job.id);
     return res.status(202).json({ job: safeJob(job) });
   } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: error.message?.includes('database') ? error.message : 'Could not start this translation job.' });
   } finally {
     if (req.file && !retained) await fs.rm(req.file.path, { force: true }).catch(() => {});
@@ -151,7 +153,8 @@ export async function createImageTranslationJob(req, res) {
     retained = true;
     enqueueTranslation(job.id);
     return res.status(202).json({ job: safeJob(job) });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'Could not start image translation. Please try again.' });
   } finally {
     if (!retained) await fs.rm(uploaded.path, { force: true }).catch(() => {});
@@ -189,8 +192,9 @@ export async function createTextTranslationJob(req, res) {
     });
     enqueueTranslation(job.id);
     return res.status(202).json({ job: safeJob(job) });
-  } catch {
+  } catch (error) {
     await fs.rm(originalTextPath, { force: true }).catch(() => {});
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'Could not start this text translation. Please try again.' });
   }
 }
@@ -225,7 +229,8 @@ export async function getTranslationJob(req, res) {
     const job = await ownedJob(req, res);
     if (!job) return undefined;
     return res.json({ job: safeJob(job) });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not load this translation job. Please try again.' });
   }
 }
@@ -239,7 +244,8 @@ export async function getJobText(req, res) {
     const text = await fs.readFile(filePath, 'utf8').catch(() => null);
     if (text === null) return res.status(410).json({ message: 'Temporary text files have expired. Submit the document again.' });
     return res.type('text/plain').send(text);
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not load this text preview.' });
   }
 }
@@ -276,7 +282,8 @@ export async function streamJobFile(req, res) {
     if (req.query.inline === '1' && (file.type === 'application/pdf' || file.type.startsWith('image/'))) res.setHeader('Content-Disposition', 'inline');
     else res.attachment(file.name);
     return res.sendFile(absolutePath);
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not prepare this download.' });
   }
 }
@@ -291,7 +298,8 @@ export async function cancelTranslationJob(req, res) {
     job.errorMessage = '';
     await job.save();
     return res.json({ job: safeJob(job) });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not cancel this job.' });
   }
 }
@@ -313,7 +321,8 @@ export async function deleteTranslationJob(req, res) {
     await job.deleteOne();
     await Promise.all(filePaths.map((filePath) => fs.rm(filePath, { force: true }).catch(() => {})));
     return res.json({ message: 'Translation and its saved files were deleted.' });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not delete this translation. Please try again.' });
   }
 }
@@ -326,7 +335,8 @@ export async function setJobFavorite(req, res) {
     job.isFavorite = req.body?.isFavorite === true;
     await job.save();
     return res.json({ job: safeJob(job) });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not update this favorite.' });
   }
 }

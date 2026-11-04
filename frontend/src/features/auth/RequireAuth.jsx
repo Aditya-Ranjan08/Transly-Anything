@@ -2,8 +2,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext.jsx';
 
 export default function RequireAuth({ children }) {
-  const { user, loading, sessionError, retrySession } = useAuth();
+  const { user, loading, loggingOut, sessionError, retrySession } = useAuth();
   const location = useLocation();
+
+  if (loggingOut) return <Navigate to="/" replace />;
 
   if (loading) return <main className="auth-loading"><span className="auth-spinner" /><p>Opening your workspace…</p></main>;
   if (sessionError) {

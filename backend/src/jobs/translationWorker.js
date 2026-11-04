@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import mongoose from 'mongoose';
 import TranslationJob from '../models/TranslationJob.js';
 import { translateText } from '../services/translation/libreTranslate.js';
 import { extractPdfPages } from '../services/pdf/extractText.js';
@@ -16,6 +17,9 @@ const expiryHours = Math.max(1, Number(process.env.TEMP_FILE_TTL_HOURS) || 24);
 const queue = [];
 const queuedIds = new Set();
 let draining = false;
+let cleanupTimer = null;
+let retryTimer = null;
+const interruptedJobIds = new Set();
 
 function splitIntoChunks(text) {
   const chunks = [];
@@ -29,6 +33,34 @@ function splitIntoChunks(text) {
   }
   if (remainder) chunks.push(remainder);
   return chunks;
+}
+
+function scheduleDatabaseRecoveryRetry() {
+  if (retryTimer) return;
+  retryTimer = setTimeout(async () => {
+    retryTimer = null;
+    if (mongoose.connection.readyState !== 1) {
+      scheduleDatabaseRecoveryRetry();
+      return;
+    }
+    const interruptedIds = [...interruptedJobIds];
+    for (const jobId of interruptedIds) {
+      try {
+        await updateActiveJob(jobId, {
+          status: 'failed',
+          currentStage: 'Failed',
+          errorMessage: 'A database interruption stopped this translation. Please try again.',
+          expiresAt: new Date(Date.now() + expiryHours * 60 * 60 * 1000),
+        });
+        interruptedJobIds.delete(jobId);
+      } catch {
+        scheduleDatabaseRecoveryRetry();
+        return;
+      }
+    }
+    void drainQueue().catch((error) => console.error(`Translation queue recovery failed (${error.name || 'unknown'}).`));
+  }, 5000);
+  retryTimer.unref?.();
 }
 
 async function updateActiveJob(jobId, fields) {
@@ -156,8 +188,29 @@ async function drainQueue() {
   try {
     while (queue.length) {
       const jobId = queue.shift();
-      try { await processJob(jobId); }
-      finally { queuedIds.delete(jobId); }
+      let retryAfterReconnect = false;
+      try {
+        await processJob(jobId);
+      } catch (error) {
+        console.error(`Translation worker could not process job ${jobId} (${error.name || 'unknown'}).`);
+        if (mongoose.connection.readyState !== 1) {
+          interruptedJobIds.add(jobId);
+          retryAfterReconnect = true;
+        } else {
+          await updateActiveJob(jobId, {
+            status: 'failed',
+            currentStage: 'Failed',
+            errorMessage: 'A temporary server error interrupted this translation. Please try again.',
+            expiresAt: new Date(Date.now() + expiryHours * 60 * 60 * 1000),
+          }).catch((updateError) => console.error(`Could not save failure state for job ${jobId} (${updateError.name || 'unknown'}).`));
+        }
+      } finally {
+        queuedIds.delete(jobId);
+      }
+      if (retryAfterReconnect) {
+        scheduleDatabaseRecoveryRetry();
+        break;
+      }
     }
   } finally {
     draining = false;
@@ -169,7 +222,7 @@ export function enqueueTranslation(jobId) {
   if (queuedIds.has(id)) return;
   queuedIds.add(id);
   queue.push(id);
-  void drainQueue();
+  void drainQueue().catch((error) => console.error(`Translation queue failed (${error.name || 'unknown'}).`));
 }
 
 export async function recoverTranslationJobs() {
@@ -182,7 +235,12 @@ export async function recoverTranslationJobs() {
   const queued = await TranslationJob.find({ status: 'queued' }).select('_id').lean();
   queued.forEach(({ _id }) => enqueueTranslation(_id));
   await cleanupExpiredFiles();
-  setInterval(() => void cleanupExpiredFiles(), 60 * 60 * 1000).unref();
+  if (!cleanupTimer) {
+    cleanupTimer = setInterval(() => {
+      void cleanupExpiredFiles().catch((error) => console.error(`Expired-file cleanup failed (${error.name || 'unknown'}).`));
+    }, 60 * 60 * 1000);
+    cleanupTimer.unref?.();
+  }
 }
 
 export async function cleanupExpiredFiles() {

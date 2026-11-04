@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [sessionError, setSessionError] = useState('');
   const [sessionCheck, setSessionCheck] = useState(0);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -33,6 +34,7 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({
     user,
     loading,
+    loggingOut,
     sessionError,
     retrySession() {
       setLoading(true);
@@ -54,14 +56,15 @@ export function AuthProvider({ children }) {
       return data.user;
     },
     async logout() {
+      // Clear the local session immediately so the UI can leave protected pages.
+      setLoggingOut(true);
+      setUser(null);
+      setSessionError('');
       try { await api.post('/auth/logout'); }
       catch { /* The client still leaves the protected workspace if the API is unavailable. */ }
-      finally {
-        setUser(null);
-        setSessionError('');
-      }
+      finally { setLoggingOut(false); }
     },
-  }), [user, loading, sessionError]);
+  }), [user, loading, loggingOut, sessionError]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

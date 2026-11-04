@@ -11,6 +11,9 @@ function createTransporter() {
     host: EMAIL_HOST,
     port: Number(EMAIL_PORT),
     secure: Number(EMAIL_PORT) === 465,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
     auth: { user: EMAIL, pass: EMAIL_PASS },
   });
 }

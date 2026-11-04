@@ -241,8 +241,9 @@ export default function App() {
   const navigate = useNavigate();
 
   async function handleLogout() {
-    await logout();
+    const logoutRequest = logout();
     navigate('/', { replace: true });
+    await logoutRequest;
   }
 
   useEffect(() => {
@@ -254,10 +255,10 @@ export default function App() {
     <Suspense fallback={<main className="auth-loading"><span className="auth-spinner" /><p>Preparing your workspace…</p></main>}>
       <Routes>
         <Route path="/" element={<LandingPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} />} />
-        <Route path="/login" element={<AuthPage key="login" mode="login" dark={dark} setDark={setDark} />} />
-        <Route path="/register" element={<AuthPage key="register" mode="register" dark={dark} setDark={setDark} />} />
-        <Route path="/forgot-password" element={<AuthPage key="forgot-password" mode="forgot-password" dark={dark} setDark={setDark} />} />
-        <Route path="/reset-password" element={<AuthPage key="reset-password" mode="reset-password" dark={dark} setDark={setDark} />} />
+        <Route path="/login" element={<AuthPage key="login" mode="login" />} />
+        <Route path="/register" element={<AuthPage key="register" mode="register" />} />
+        <Route path="/forgot-password" element={<AuthPage key="forgot-password" mode="forgot-password" />} />
+        <Route path="/reset-password" element={<AuthPage key="reset-password" mode="reset-password" />} />
         <Route path="/dashboard" element={<RequireAuth><DashboardPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
         <Route path="/translate/document" element={<RequireAuth><DocumentTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />
         <Route path="/translate/image" element={<RequireAuth><ImageTranslatorPage dark={dark} setDark={setDark} user={user} onLogout={handleLogout} /></RequireAuth>} />

@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 
 function isLocalOrigin(origin) {
@@ -52,7 +53,10 @@ export async function requireAuth(req, res, next) {
     if (!user.isVerified) return res.status(403).json({ message: 'Verify your email address before continuing.' });
     req.user = user;
     next();
-  } catch {
+  } catch (error) {
+    if (mongoose.connection.readyState !== 1 || error.name?.startsWith('Mongo') || error.name?.startsWith('Mongoose')) {
+      return res.status(503).json({ message: 'The database is temporarily unavailable. Please retry shortly.' });
+    }
     res.clearCookie('transly_token', authCookieOptions(req));
     return res.status(401).json({ message: 'Your session has expired. Please log in again.' });
   }

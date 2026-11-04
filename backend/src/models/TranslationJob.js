@@ -40,4 +40,9 @@ const translationJobSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+translationJobSchema.index({ userId: 1, createdAt: -1 });
+translationJobSchema.index({ userId: 1, status: 1, createdAt: -1 });
+translationJobSchema.index({ userId: 1, isFavorite: 1, createdAt: -1 });
+translationJobSchema.index({ expiresAt: 1 });
+
 export default mongoose.model("TranslationJob", translationJobSchema);

@@ -1,12 +1,12 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, FileText, Globe2, Languages, Moon, ShieldCheck, Sparkles, Sun } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Eye, EyeOff, FileText, Globe2, Languages, ShieldCheck, Sparkles } from 'lucide-react';
 import Brand from '../../components/Brand.jsx';
 import { useAuth } from './AuthContext.jsx';
 import api from '../../lib/api.js';
 
-export default function AuthPage({ mode, dark, setDark }) {
+export default function AuthPage({ mode }) {
   const isRegister = mode === 'register';
   const isForgotPassword = mode === 'forgot-password';
   const isResetPassword = mode === 'reset-password';
@@ -73,7 +73,7 @@ export default function AuthPage({ mode, dark, setDark }) {
   return (
     <main className="auth-page">
       <section className="auth-story">
-        <div className="auth-story-top"><Brand /><button className="auth-theme-toggle" onClick={() => setDark(!dark)} aria-label={`Switch to ${dark ? 'light' : 'dark'} mode`}>{dark ? <Sun size={16} /> : <Moon size={16} />}</button></div>
+        <div className="auth-story-top"><Brand /></div>
         <div className="auth-story-copy">
           <span className="auth-eyebrow"><Sparkles size={14} /> A clearer way to understand</span>
           <h1>Good words<br />go <span>everywhere.</span></h1>
@@ -81,8 +81,8 @@ export default function AuthPage({ mode, dark, setDark }) {
           <div className="auth-art" aria-hidden="true">
             <div className="auth-art-halo" />
             <div className="auth-art-paper paper-one"><span className="auth-art-icon"><FileText size={19} /></span><b>Project notes</b><i /><i /><i /><span className="auth-art-check"><Check size={13} /></span></div>
-            <div className="auth-art-paper paper-two"><span className="paper-language">EN <ArrowRight size={12} /> à¤¹à¤¿à¤¨à¥à¤¦à¥€</span><i /><i /><i /></div>
-            <span className="auth-art-float float-globe"><Globe2 size={19} /></span><span className="auth-art-float float-language"><Languages size={20} /></span><span className="auth-art-star">âœ¦</span>
+            <div className="auth-art-paper paper-two"><span className="paper-language">EN <ArrowRight size={12} /> Hindi</span><i /><i /><i /></div>
+            <span className="auth-art-float float-globe"><Globe2 size={19} /></span><span className="auth-art-float float-language"><Languages size={20} /></span><span className="auth-art-star">{'\u2726'}</span>
           </div>
           <div className="auth-benefits"><span><ShieldCheck size={15} /> Private workspace</span><span><Check size={15} /> Your own translation history</span></div>
         </div>
@@ -92,7 +92,6 @@ export default function AuthPage({ mode, dark, setDark }) {
       <section className="auth-form-side">
         <Link className="auth-back-link" to="/"><ArrowLeft size={15} /> Back to home</Link>
         <motion.div className="auth-card" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35 }}>
-          <div className="auth-card-brand"><Brand /></div>
           <span className="auth-card-kicker">{isRegister ? 'YOUR TRANSLATION SPACE' : 'WELCOME BACK'}</span>
           <h2>{verificationPending ? 'Verify your email' : isForgotPassword ? 'Forgot password' : isResetPassword ? 'Reset your password' : isRegister ? 'Create your account' : 'Log in to Transly'}</h2>
           <p className="auth-card-description">{verificationPending ? 'Enter the 6-digit code we sent to your email address.' : isForgotPassword ? 'Enter your email address and we’ll send a reset code.' : isResetPassword ? 'Enter the code from your email and choose a new password.' : isRegister ? 'Start with a free account. Your workspace is ready when you are.' : 'Pick up where you left off and continue your translation journey.'}</p>

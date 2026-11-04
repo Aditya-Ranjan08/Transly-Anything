@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 import { authCookieOptions } from '../middleware/auth.js';
 import { sendOtpEmail } from '../services/email.js';
+import { sendDatabaseUnavailable } from '../utils/databaseErrors.js';
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -72,6 +73,7 @@ export async function register(req, res) {
     return res.status(201).json({ message: 'We sent a verification code to your email address.' });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: 'An account with this email already exists. Log in instead.' });
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     if (error.status) return res.status(error.status).json({ message: error.message });
     return res.status(500).json({ message: 'We could not create your account. Please try again.' });
   }
@@ -91,7 +93,8 @@ export async function verifyOtp(req, res) {
     user.otpExpires = undefined;
     await user.save();
     return res.json({ message: 'Your email has been verified. You can now log in.' });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not verify your email. Please try again.' });
   }
 }
@@ -111,6 +114,7 @@ export async function login(req, res) {
     setSessionCookie(req, res, user.id);
     return res.json({ user: safeUser(user) });
   } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     if (error.status) return res.status(error.status).json({ message: error.message });
     return res.status(500).json({ message: 'We could not log you in. Please try again.' });
   }
@@ -130,6 +134,7 @@ export async function forgotPassword(req, res) {
     }
     return res.json({ message: 'If an account exists for that email, a password reset code has been sent.' });
   } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     if (error.status) return res.status(error.status).json({ message: error.message });
     return res.status(500).json({ message: 'We could not send a reset code. Please try again.' });
   }
@@ -151,7 +156,8 @@ export async function resetPassword(req, res) {
     user.resetPasswordExpires = undefined;
     await user.save();
     return res.json({ message: 'Your password has been reset. You can now log in.' });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not reset your password. Please try again.' });
   }
 }
@@ -177,7 +183,8 @@ export async function changePassword(req, res) {
     user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
     return res.json({ message: 'Your password has been changed.' });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not change your password. Please try again.' });
   }
 }
@@ -193,7 +200,8 @@ export async function updatePreferences(req, res) {
     const user = await User.findByIdAndUpdate(req.user.id, { preferredLanguage }, { new: true, runValidators: true });
     if (!user) return res.status(404).json({ message: 'Your account could not be found.' });
     return res.json({ user: safeUser(user), message: 'Your language preference has been saved.' });
-  } catch {
+  } catch (error) {
+    if (sendDatabaseUnavailable(res, error)) return undefined;
     return res.status(500).json({ message: 'We could not save your preference. Please try again.' });
   }
 }
