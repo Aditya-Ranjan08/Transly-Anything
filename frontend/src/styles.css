@@ -243,6 +243,69 @@
     width: 100%;
   }
 }
+
+/* Compact landing header: keep the mobile navigation focused on the essentials. */
+@media (max-width: 640px) {
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    backdrop-filter: blur(16px);
+  }
+  .nav-wrap {
+    gap: 12px;
+  }
+  .main-nav,
+  .menu-toggle {
+    display: none !important;
+  }
+  .nav-actions {
+    gap: 9px;
+  }
+  .theme-toggle {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+  }
+  .nav-actions .login-link {
+    display: inline-flex;
+    min-height: 42px;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 15px;
+    border-radius: 14px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .landing-account-menu {
+    display: none;
+  }
+  .brand {
+    gap: 7px;
+    font-size: 21px;
+  }
+  .brand-symbol {
+    width: 31px;
+    height: 31px;
+  }
+}
+
+@media (max-width: 380px) {
+  .section-wrap,
+  .nav-wrap {
+    width: calc(100% - 28px);
+  }
+  .theme-toggle {
+    width: 39px;
+    height: 39px;
+  }
+  .nav-actions .login-link {
+    min-height: 39px;
+    padding-inline: 11px;
+  }
+}
 body {
   min-width: 0;
   min-height: 100vh;
@@ -6588,4 +6651,27 @@ button {
   .result-expiry {
     width: 100%;
   }
+}
+
+/* Compact landing header: keep mobile navigation focused on the essentials. */
+.mobile-dashboard-link { display: none; }
+@media (max-width: 640px) {
+  .site-header { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(16px); }
+  .nav-wrap { gap: 12px; }
+  .main-nav, .menu-toggle { display: none !important; }
+  .nav-actions { gap: 9px; }
+  .theme-toggle { width: 42px; height: 42px; flex: 0 0 auto; border-radius: 14px; }
+  .nav-actions .login-link {
+    display: inline-flex; min-height: 42px; align-items: center; justify-content: center;
+    gap: 7px; padding: 0 15px; border-radius: 14px; font-size: 13px; white-space: nowrap;
+  }
+  .nav-actions .mobile-dashboard-link { display: inline-flex; }
+  .landing-account-menu { display: none; }
+  .brand { gap: 7px; font-size: 21px; }
+  .brand-symbol { width: 31px; height: 31px; }
+}
+@media (max-width: 380px) {
+  .section-wrap, .nav-wrap { width: calc(100% - 28px); }
+  .theme-toggle { width: 39px; height: 39px; }
+  .nav-actions .login-link { min-height: 39px; padding-inline: 11px; }
 }

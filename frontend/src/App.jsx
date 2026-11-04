@@ -130,6 +130,7 @@ function LandingPage({ dark, setDark, user, onLogout }) {
             </div> : <>
               <Link className="login-link" to="/login"><LogIn size={16} /> Log in</Link>
             </>}
+            {user && <Link className="login-link mobile-dashboard-link" to="/dashboard"><LayoutDashboard size={16} /> Dashboard</Link>}
           </div>
           <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)} aria-label={menuOpen ? 'Close menu' : 'Open menu'}>
             {menuOpen ? <X size={22} /> : <Menu size={22} />}
